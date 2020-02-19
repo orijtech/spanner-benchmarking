@@ -26,16 +26,35 @@ CREATE TABLE for_spanner_v1 (
 ```
 
 ### Results
+
+#### Comparing Reads
+
+Comparing
+
+    spanner.dbapi.cursor.execute('SELECT * from T where for_dbapi where age <= 200')
+
+vs
+
+    spanner_v1.Spanshot(multi_use=True).execute_sql('SELECT * from T where for_spanner_v1 where age <= 200')
+
+by running
+
+```shell
+python3 main.py
+```
+
+and then applying some percentile aggregations:
+
 For example, having used Prometheus as the metrics backend and apply a p95th aggregation with 
 ```shell
 histogram_quantile(0.95, sum(rate(nz1_latency_bucket[5m])) by (service, error, le))
 ```
 
-as of `Mon 17 Feb 2020 17:53:06 PST`, we get back a comparison that shows that the spanner.dbapi's
+as of `Tue 18 Feb 2020 20:15:04 PST`, we get back a comparison that shows that the spanner.dbapi's
 performance is worse than using spanner_v1, per
 
-* spanner.dbapi p95th latency of 48.85203 ms
-![](./assets/spanner-dbapi-p95th-SELECT.png)
+* spanner.dbapi p99th latency of 205.99999 ms
+![](./assets/spanner-dbapi-p99th-SELECT.png)
 
-* spanner_v1 p95th latency of 46.82726 ms
-![](./assets/spanner-v1-p95th-SELECT.png)
+* spanner_v1 p95th latency of 218.81818 ms
+![](./assets/spanner-v1-p99th-SELECT.png)
